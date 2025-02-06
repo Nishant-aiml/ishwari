@@ -9,6 +9,7 @@ import ExpiryFood from './pages/ExpiryFood';
 import Volunteer from './pages/Volunteer';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import FoodMap from './pages/FoodMap';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Heart, Utensils, Building2, Users, ArrowRight, Clock, Leaf } from 'lucide-react';
@@ -220,6 +221,11 @@ function App() {
               <Route path="/volunteer" element={
                 <PrivateRoute>
                   <Volunteer />
+                </PrivateRoute>
+              } />
+              <Route path="/food-map" element={
+                <PrivateRoute>
+                  <FoodMap />
                 </PrivateRoute>
               } />
             </Routes>

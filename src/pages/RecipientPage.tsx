@@ -1,303 +1,173 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, MapPin, Clock, Package, X, Search, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
-interface FoodDonation {
+interface FoodListing {
   id: string;
-  foodType: string;
-  category: string;
-  quantity: number;
-  unit: string;
-  location: string;
+  title: string;
+  description: string;
+  quantity: string;
   expiryDate: string;
-  donorName: string;
-  distance: number;
+  location: string;
+  distance: string;
+  type: string;
+  imageUrl: string;
 }
 
-const RecipientPage = () => {
-  const [donations, setDonations] = useState<FoodDonation[]>([]);
-  const [filteredDonations, setFilteredDonations] = useState<FoodDonation[]>([]);
-  const [filters, setFilters] = useState({
-    foodType: '',
-    location: '',
-    expiring: false
+const RecipientPage: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedType, setSelectedType] = useState('all');
+
+  // Dummy data for food listings
+  const foodListings: FoodListing[] = [
+    {
+      id: '1',
+      title: 'Fresh Vegetables',
+      description: 'Assorted fresh vegetables including carrots, tomatoes, and lettuce',
+      quantity: '10 kg',
+      expiryDate: '2025-02-08',
+      location: 'Local Farm Market',
+      distance: '2.5 km',
+      type: 'vegetables',
+      imageUrl: 'https://images.unsplash.com/photo-1557844352-761f2565b576?auto=format&fit=crop&w=300',
+    },
+    {
+      id: '2',
+      title: 'Bread and Pastries',
+      description: 'Freshly baked bread and assorted pastries',
+      quantity: '20 pieces',
+      expiryDate: '2025-02-07',
+      location: 'Downtown Bakery',
+      distance: '1.8 km',
+      type: 'bakery',
+      imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300',
+    },
+    {
+      id: '3',
+      title: 'Canned Goods',
+      description: 'Various canned foods including beans, corn, and soup',
+      quantity: '15 cans',
+      expiryDate: '2025-08-01',
+      location: 'Food Bank Central',
+      distance: '3.2 km',
+      type: 'canned',
+      imageUrl: 'https://images.unsplash.com/photo-1584263347416-85a696b4eda7?auto=format&fit=crop&w=300',
+    },
+  ];
+
+  const foodTypes = ['all', 'vegetables', 'bakery', 'canned', 'dairy', 'meat'];
+
+  const filteredListings = foodListings.filter(listing => {
+    const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         listing.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === 'all' || listing.type === selectedType;
+    return matchesSearch && matchesType;
   });
-  const [showModal, setShowModal] = useState(false);
-  const [selectedDonation, setSelectedDonation] = useState<FoodDonation | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-
-  // Load dummy data from localStorage or initialize if not present
-  useEffect(() => {
-    const storedDonations = localStorage.getItem('availableDonations');
-    if (storedDonations) {
-      setDonations(JSON.parse(storedDonations));
-    } else {
-      const dummyDonations: FoodDonation[] = [
-        {
-          id: '1',
-          foodType: 'Fresh Vegetables',
-          category: 'produce',
-          quantity: 25,
-          unit: 'kg',
-          location: 'Downtown Food Market',
-          expiryDate: '2025-02-08',
-          donorName: 'Green Grocers',
-          distance: 2.5
-        },
-        {
-          id: '2',
-          foodType: 'Prepared Meals',
-          category: 'prepared',
-          quantity: 50,
-          unit: 'meals',
-          location: 'Community Kitchen',
-          expiryDate: '2025-02-07',
-          donorName: 'Local Restaurant',
-          distance: 1.8
-        },
-        {
-          id: '3',
-          foodType: 'Bread and Pastries',
-          category: 'bakery',
-          quantity: 30,
-          unit: 'items',
-          location: 'Fresh Bakery',
-          expiryDate: '2025-02-07',
-          donorName: 'Daily Bread',
-          distance: 3.2
-        }
-      ];
-      setDonations(dummyDonations);
-      localStorage.setItem('availableDonations', JSON.stringify(dummyDonations));
-    }
-  }, []);
-
-  // Filter donations based on selected filters
-  useEffect(() => {
-    let filtered = [...donations];
-    
-    if (filters.foodType) {
-      filtered = filtered.filter(d => 
-        d.foodType.toLowerCase().includes(filters.foodType.toLowerCase()) ||
-        d.category.toLowerCase().includes(filters.foodType.toLowerCase())
-      );
-    }
-    
-    if (filters.location) {
-      filtered = filtered.filter(d => 
-        d.location.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-    
-    if (filters.expiring) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      filtered = filtered.filter(d => new Date(d.expiryDate) <= tomorrow);
-    }
-    
-    setFilteredDonations(filtered);
-  }, [donations, filters]);
-
-  const handleRequest = (donation: FoodDonation) => {
-    setSelectedDonation(donation);
-    setShowModal(true);
-  };
-
-  const confirmRequest = () => {
-    if (selectedDonation) {
-      // Store request in localStorage
-      const requests = JSON.parse(localStorage.getItem('foodRequests') || '[]');
-      requests.push({
-        donationId: selectedDonation.id,
-        requestTime: new Date().toISOString(),
-        status: 'pending'
-      });
-      localStorage.setItem('foodRequests', JSON.stringify(requests));
-      setShowModal(false);
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-10 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
-      >
-        {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Available Food Donations</h1>
-          <p className="text-gray-600 dark:text-gray-300">Find and request available food donations in your area</p>
-        </div>
-
-        {/* Filters Section */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:py-12 sm:px-6">
+      <div className="max-w-7xl mx-auto">
         <motion.div
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 mb-8"
-          initial={false}
-          animate={{ height: showFilters ? 'auto' : '64px' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-5 h-5 text-green-500" />
-              <span className="font-medium text-gray-700 dark:text-gray-200">Filters</span>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowFilters(!showFilters)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <motion.div
-                animate={{ rotate: showFilters ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChevronDown className="w-5 h-5" />
-              </motion.div>
-            </motion.button>
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Available Food Donations
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Browse through available food donations in your area. All items are verified for quality and safety.
+            </p>
           </div>
 
-          <AnimatePresence>
-            {showFilters && (
+          {/* Search and Filters */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search for food items..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+              <div className="w-full sm:w-48">
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  {foodTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Food Listings */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredListings.map(listing => (
               <motion.div
+                key={listing.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Food Type"
-                    value={filters.foodType}
-                    onChange={(e) => setFilters({ ...filters, foodType: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                <div className="aspect-w-16 aspect-h-9">
+                  <img
+                    src={listing.imageUrl}
+                    alt={listing.title}
+                    className="object-cover w-full h-48"
                   />
                 </div>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Location"
-                    value={filters.location}
-                    onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                  />
-                </div>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.expiring}
-                    onChange={(e) => setFilters({ ...filters, expiring: e.target.checked })}
-                    className="w-4 h-4 text-green-500 rounded border-gray-300 dark:border-gray-600 focus:ring-green-500"
-                  />
-                  <span className="text-gray-700 dark:text-gray-200">Expiring Soon</span>
-                </label>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Donations Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDonations.map((donation) => (
-            <motion.div
-              key={donation.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              whileHover={{ scale: 1.02 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden"
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{donation.foodType}</h3>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                    {donation.quantity} {donation.unit}
-                  </span>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center text-gray-600 dark:text-gray-300">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>{donation.location}</span>
+                <div className="p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {listing.title}
+                    </h3>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {listing.distance}
+                    </span>
                   </div>
-                  <div className="flex items-center text-gray-600 dark:text-gray-300">
-                    <Clock className="w-4 h-4 mr-2" />
-                    <span>Expires: {new Date(donation.expiryDate).toLocaleDateString()}</span>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {listing.description}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Quantity:</span>
+                      <p className="font-medium text-gray-900 dark:text-white">{listing.quantity}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Expires:</span>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {new Date(listing.expiryDate).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center text-gray-600 dark:text-gray-300">
-                    <Package className="w-4 h-4 mr-2" />
-                    <span>From: {donation.donorName}</span>
+                  <div className="pt-3">
+                    <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">
+                      Request Food
+                    </button>
                   </div>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleRequest(donation)}
-                  className="mt-6 w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200"
-                >
-                  Request Food
-                </motion.button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Confirmation Modal */}
-        <AnimatePresence>
-          {showModal && selectedDonation && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Confirm Request</h3>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  Are you sure you want to request {selectedDonation.quantity} {selectedDonation.unit} of {selectedDonation.foodType} from {selectedDonation.donorName}?
-                </p>
-
-                <div className="flex space-x-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={confirmRequest}
-                    className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2 rounded-lg hover:from-green-600 hover:to-green-700"
-                  >
-                    Confirm
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                  >
-                    Cancel
-                  </motion.button>
                 </div>
               </motion.div>
-            </motion.div>
+            ))}
+          </div>
+
+          {filteredListings.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-600 dark:text-gray-300">
+                No food listings found matching your criteria.
+              </p>
+            </div>
           )}
-        </AnimatePresence>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };

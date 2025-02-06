@@ -1,251 +1,168 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Beaker, Leaf, Apple, FlaskConical, Send, X } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
 
-interface RepurposeMethod {
+interface FoodItem {
   id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
-  benefits: string[];
+  name: string;
+  expiryDate: string;
+  quantity: string;
+  type: string;
+  repurposingMethods: string[];
+  imageUrl: string;
 }
 
-const ExpiryFood = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<RepurposeMethod | null>(null);
-  const [formData, setFormData] = useState({
-    foodType: '',
-    quantity: '',
-    location: '',
-    description: ''
-  });
-
-  const repurposeMethods: RepurposeMethod[] = [
+const ExpiryFood: React.FC = () => {
+  const foodItems: FoodItem[] = [
     {
-      id: 'biogas',
-      title: 'Biogas Production',
-      description: 'Convert expired food into renewable energy through anaerobic digestion',
-      icon: <Beaker className="w-12 h-12" />,
-      color: 'from-purple-500 to-indigo-600',
-      benefits: [
-        'Renewable energy generation',
-        'Reduced methane emissions',
-        'Organic fertilizer production'
-      ]
+      id: '1',
+      name: 'Ripe Bananas',
+      expiryDate: '2025-02-08',
+      quantity: '5 kg',
+      type: 'Fruit',
+      repurposingMethods: [
+        'Make banana bread',
+        'Freeze for smoothies',
+        'Create banana chips',
+        'Use in baking recipes'
+      ],
+      imageUrl: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300'
     },
     {
-      id: 'compost',
-      title: 'Composting',
-      description: 'Transform food waste into nutrient-rich soil for agriculture',
-      icon: <Leaf className="w-12 h-12" />,
-      color: 'from-green-500 to-emerald-600',
-      benefits: [
-        'Natural fertilizer creation',
-        'Soil enrichment',
-        'Zero waste solution'
-      ]
+      id: '2',
+      name: 'Day-Old Bread',
+      expiryDate: '2025-02-07',
+      quantity: '10 loaves',
+      type: 'Bakery',
+      repurposingMethods: [
+        'Make breadcrumbs',
+        'Create croutons',
+        'French toast',
+        'Bread pudding'
+      ],
+      imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300'
     },
     {
-      id: 'animal-feed',
-      title: 'Animal Feed',
-      description: 'Process expired food into nutritious animal feed',
-      icon: <Apple className="w-12 h-12" />,
-      color: 'from-orange-500 to-red-600',
-      benefits: [
-        'Sustainable livestock feed',
-        'Reduced feed costs',
-        'Circular economy support'
-      ]
-    },
-    {
-      id: 'research',
-      title: 'Research & Development',
-      description: 'Utilize expired food for scientific research and innovation',
-      icon: <FlaskConical className="w-12 h-12" />,
-      color: 'from-blue-500 to-cyan-600',
-      benefits: [
-        'Scientific advancement',
-        'New product development',
-        'Food preservation research'
-      ]
+      id: '3',
+      name: 'Mixed Vegetables',
+      expiryDate: '2025-02-07',
+      quantity: '3 kg',
+      type: 'Vegetables',
+      repurposingMethods: [
+        'Make vegetable stock',
+        'Create pickles',
+        'Blend into soup',
+        'Compost if inedible'
+      ],
+      imageUrl: 'https://images.unsplash.com/photo-1557844352-761f2565b576?auto=format&fit=crop&w=300'
     }
   ];
 
-  const handleMethodClick = (method: RepurposeMethod) => {
-    setSelectedMethod(method);
-    setShowModal(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Store the donation in localStorage
-    const donations = JSON.parse(localStorage.getItem('expiryFoodDonations') || '[]');
-    donations.push({
-      ...formData,
-      method: selectedMethod?.id,
-      date: new Date().toISOString(),
-      status: 'pending'
-    });
-    localStorage.setItem('expiryFoodDonations', JSON.stringify(donations));
-    setShowModal(false);
-    setFormData({ foodType: '', quantity: '', location: '', description: '' });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-20 pb-10 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
-      >
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-4"
-          >
-            Expired Food Utilization
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-gray-600 dark:text-gray-300 text-lg"
-          >
-            Give expired food a second life through sustainable repurposing methods
-          </motion.p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:py-12 sm:px-6">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Food Expiry Management
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Discover creative ways to repurpose food items approaching their expiry date and reduce waste.
+            </p>
+          </div>
 
-        {/* Methods Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {repurposeMethods.map((method) => (
-            <motion.div
-              key={method.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleMethodClick(method)}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition-all duration-300"
-            >
-              <div className={`p-6 bg-gradient-to-br ${method.color} text-white`}>
-                <div className="flex justify-center mb-4">
-                  {method.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-2">{method.title}</h3>
-                <p className="text-sm opacity-90 text-center">{method.description}</p>
-              </div>
-              <div className="p-4 bg-opacity-50">
-                <ul className="space-y-2">
-                  {method.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Modal */}
-        <AnimatePresence>
-          {showModal && selectedMethod && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            >
+          {/* Food Items Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {foodItems.map((item) => (
               <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
+                key={item.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Donate for {selectedMethod.title}
-                  </h3>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
+                <div className="aspect-w-16 aspect-h-9">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="object-cover w-full h-48"
+                  />
                 </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="p-4 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Food Type
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.foodType}
-                      onChange={(e) => setFormData({ ...formData, foodType: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      required
-                    />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      {item.name}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="text-sm px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">
+                        {item.type}
+                      </span>
+                      <span className="text-sm px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full">
+                        Expires: {new Date(item.expiryDate).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Quantity (kg)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.quantity}
-                      onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      required
-                    />
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Quantity: {item.quantity}
+                    </h4>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Repurposing Methods:
+                      </h4>
+                      <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                        {item.repurposingMethods.map((method, index) => (
+                          <li key={index}>{method}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Pickup Location
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      required
-                    />
+                  <div className="pt-4 flex space-x-2">
+                    <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm">
+                      Donate
+                    </button>
+                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors text-sm">
+                      Get Recipe
+                    </button>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Additional Details
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      rows={3}
-                    />
-                  </div>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    className={`w-full py-3 rounded-lg bg-gradient-to-r ${selectedMethod.color} text-white flex items-center justify-center space-x-2`}
-                  >
-                    <Send className="w-5 h-5" />
-                    <span>Submit Donation</span>
-                  </motion.button>
-                </form>
+                </div>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+            ))}
+          </div>
+
+          {/* Tips Section */}
+          <div className="mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Tips to Reduce Food Waste
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Proper Storage</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Learn the best ways to store different types of food to maximize their shelf life.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Meal Planning</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Plan your meals in advance and buy only what you need to avoid excess food.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white">Creative Reuse</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Transform leftover ingredients into new, delicious meals instead of throwing them away.
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };

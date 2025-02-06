@@ -1,205 +1,101 @@
-import React, { useState } from 'react';
-import { FaBox, FaCalendarAlt, FaTruck, FaChartLine, FaMapMarkerAlt } from 'react-icons/fa';
-import QuickFoodListingForm from '../components/donor/QuickFoodListingForm';
-import PickupTracker from '../components/donor/PickupTracker';
-import ImpactMetrics from '../components/donor/ImpactMetrics';
-import RecurringDonations from '../components/donor/RecurringDonations';
-import TaxReceiptGenerator from '../components/donor/TaxReceiptGenerator';
-import WasteAnalytics from '../components/donor/WasteAnalytics';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-// Types for our data structures
-interface DonationStatus {
-  id: string;
-  type: string;
-  status: 'pending' | 'accepted' | 'in-transit' | 'completed';
-  quantity: string;
-  pickupTime: string;
-  location: string;
-}
-
-interface ImpactMetrics {
-  mealsProvided: number;
-  foodSaved: number;
-  impactPoints: number;
-}
-
-const DashboardPage = () => {
-  // Simulated user role - in real app, this would come from auth context
-  const [userRole] = useState<'donor' | 'recipient' | 'volunteer'>('donor');
-
-  // Dummy data for active donations
-  const [activeDonations] = useState<DonationStatus[]>([
-    {
-      id: '1',
-      type: 'Prepared Meals',
-      status: 'pending',
-      quantity: '25 meals',
-      pickupTime: '2:00 PM Today',
-      location: '123 Main St, City',
-    },
-    {
-      id: '2',
-      type: 'Fresh Produce',
-      status: 'in-transit',
-      quantity: '15 kg',
-      pickupTime: '3:30 PM Today',
-      location: '456 Oak Ave, City',
-    },
-  ]);
-
-  // Dummy impact metrics
-  const [impactMetrics] = useState<ImpactMetrics>({
-    mealsProvided: 250,
-    foodSaved: 125,
-    impactPoints: 1500,
-  });
-
-  const getStatusColor = (status: DonationStatus['status']) => {
-    const colors = {
-      'pending': 'bg-yellow-100 text-yellow-800',
-      'accepted': 'bg-blue-100 text-blue-800',
-      'in-transit': 'bg-purple-100 text-purple-800',
-      'completed': 'bg-green-100 text-green-800',
-    };
-    return colors[status];
-  };
-
-  const QuickActions = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <button className="flex items-center justify-center p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-        <FaBox className="mr-2" />
-        Quick Donation
-      </button>
-      <button className="flex items-center justify-center p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        <FaCalendarAlt className="mr-2" />
-        Schedule Event Donation
-      </button>
-      <button className="flex items-center justify-center p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-        <FaTruck className="mr-2" />
-        Urgent Pickup Request
-      </button>
-    </div>
-  );
-
-  const ImpactMetricsSection = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Meals Provided</h3>
-        <p className="text-3xl font-bold text-green-600">{impactMetrics.mealsProvided}</p>
-      </div>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Food Saved (kg)</h3>
-        <p className="text-3xl font-bold text-green-600">{impactMetrics.foodSaved}</p>
-      </div>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Impact Points</h3>
-        <p className="text-3xl font-bold text-green-600">{impactMetrics.impactPoints}</p>
-      </div>
-    </div>
-  );
-
-  const ActiveDonationsSection = () => (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Active Donations</h2>
-      <div className="space-y-4">
-        {activeDonations.map((donation) => (
-          <div key={donation.id} className="border rounded-lg p-4">
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold">{donation.type}</h3>
-              <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(donation.status)}`}>
-                {donation.status}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-              <div className="flex items-center">
-                <FaTruck className="mr-2" />
-                {donation.quantity}
-              </div>
-              <div className="flex items-center">
-                <FaCalendarAlt className="mr-2" />
-                {donation.pickupTime}
-              </div>
-              <div className="flex items-center col-span-2">
-                <FaMapMarkerAlt className="mr-2" />
-                {donation.location}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const [activeTab, setActiveTab] = useState('overview');
-
-  const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'donations', label: 'Donations' },
-    { id: 'impact', label: 'Impact' },
-    { id: 'analytics', label: 'Analytics' }
-  ];
+const DashboardPage: React.FC = () => {
+  const { currentUser } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back, {userRole.charAt(0).toUpperCase() + userRole.slice(1)}!
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Welcome{currentUser?.displayName ? `, ${currentUser.displayName}` : ''}
           </h1>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            Quick Donate
-          </button>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+            Choose an option below to get started
+          </p>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="flex space-x-8">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        {/* Content based on active tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <QuickFoodListingForm />
-              <PickupTracker />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Donor Dashboard Card */}
+          <Link
+            to="/donor-dashboard"
+            className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">Donor Dashboard</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                Donate excess food and track your contributions
+              </p>
             </div>
-            <ImpactMetrics />
-          </div>
-        )}
+          </Link>
 
-        {activeTab === 'donations' && (
-          <div className="space-y-6">
-            <RecurringDonations />
-            <TaxReceiptGenerator />
-          </div>
-        )}
+          {/* Recipient Page Card */}
+          <Link
+            to="/recipient"
+            className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">Find Food</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                Browse available food donations near you
+              </p>
+            </div>
+          </Link>
 
-        {activeTab === 'impact' && (
-          <div className="space-y-6">
-            <ImpactMetricsSection />
-          </div>
-        )}
+          {/* Expiry Food Card */}
+          <Link
+            to="/expiry-food"
+            className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">Expiring Food</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                Manage and track food nearing expiration
+              </p>
+            </div>
+          </Link>
 
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <WasteAnalytics />
-          </div>
-        )}
+          {/* Volunteer Card */}
+          <Link
+            to="/volunteer"
+            className="transform transition-all duration-300 hover:scale-105 hover:shadow-xl md:col-span-2 lg:col-span-1"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">Volunteer</h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                Help distribute food to those in need
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        <div className="mt-8 sm:mt-12 text-center">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+            Need help? Contact our support team at support@foodshare.com
+          </p>
+        </div>
       </div>
     </div>
   );

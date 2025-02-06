@@ -12,12 +12,19 @@
   "dependencies": {
     "@firebase/auth": "^1.8.2",
     "@radix-ui/react-tabs": "^1.0.4",
+    "@react-google-maps/api": "^2.20.5",
+    "@types/google-maps": "^3.2.6",
+    "@types/leaflet": "^1.9.16",
     "firebase": "^11.2.0",
     "framer-motion": "^10.16.4",
+    "leaflet": "^1.9.4",
+    "leaflet.heat": "^0.2.0",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
+    "react-leaflet": "^5.0.0",
+    "react-leaflet-heatmap-layer-v3": "^3.0.3-beta-1",
     "react-router-dom": "^6.18.0"
   },
   "devDependencies": {
